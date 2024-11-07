@@ -22,4 +22,9 @@ export default {
 
 <style>
 @import '~vuetify/styles';
+.v-application {
+  font-family: "Itim", cursive !important;
+  font-weight: 400;
+  font-style: normal;
+}
 </style>

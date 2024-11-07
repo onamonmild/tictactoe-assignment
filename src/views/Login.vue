@@ -1,32 +1,37 @@
 <template>
-  <v-container class="d-flex flex-column align-center justify-center">
-    <h2>Login to Play Tic Tac Toe</h2>
-    <v-btn @click="signInWithEmail" color="success" class="mb-4">
-      Login with Email
-    </v-btn>
-    <v-btn @click="signInWithGoogle" color="primary" class="mb-4">
-      Login with Google
-    </v-btn>
-    <v-btn @click="signInWithFacebook" color="blue">
-      Login with Facebook
-    </v-btn>
+  <v-container style="padding-top: 3%;">
+    <v-card class="main-card" max-width="400" style="padding: 3%; text-align: center;" elevation="15">
+      <h1>Log in</h1>
+      <v-img :src="require('../assets/logo.gif')" class="my-3" contain height="200" />
+      <v-btn class="login-button" @click="signInWithAnonymous" color="#85929e" prepend-icon="mdi-incognito">
+        Anonymous
+      </v-btn>
+      <v-spacer></v-spacer>
+      <v-btn  class="login-button" @click="signInWithGoogle" color="#c71610" prepend-icon="mdi-gmail">
+        Google
+      </v-btn>
+      <v-spacer></v-spacer>
+      <v-btn class="login-button" @click="signInWithFacebook" color="blue" prepend-icon="mdi-facebook">
+        Facebook
+      </v-btn>
+    </v-card>
   </v-container>
 </template>
 
 <script>
-import { auth, googleProvider, facebookProvider, emailProvider } from '../firebase';
+import { auth, googleProvider, facebookProvider, signInAnonymouslyUser } from '../firebase';
 import { signInWithPopup } from 'firebase/auth';
 
 export default {
   name: 'LoginPage', // เปลี่ยนชื่อให้เป็น multi-word
   methods: {
-    async signInWithEmail() {
+    async signInWithAnonymous() {
       try {
-        await signInWithPopup(auth, emailProvider);
+        await signInWithPopup(auth, signInAnonymouslyUser);
         this.$router.push('/Tictactoe'); // ไปที่หน้าเกมหลังจาก login สำเร็จ
       } catch (error) {
-        console.error('Error during Email login:', error);
-        alert('Failed to log in with Email');
+        console.error('Error during Anonymous login:', error);
+        alert('Failed to log in with Anonymous');
       }
     },
     async signInWithGoogle() {
@@ -54,5 +59,18 @@ export default {
 <style scoped>
 h2 {
   margin-bottom: 20px;
+}
+
+.main-card {
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 50px;
+}
+
+.login-button {
+  width: 200px;
+  height: 40px;
+  border-radius: 8px;
+  margin-bottom: 10px;
 }
 </style>
