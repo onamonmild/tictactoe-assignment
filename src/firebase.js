@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, FacebookAuthProvider, signInAnonymously } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, FacebookAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCWrWMtP8Uygp1C-F98MpqCHacDNhsYEBg",
@@ -14,16 +14,3 @@ const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 export const facebookProvider = new FacebookAuthProvider();
-
-function signInAnonymouslyUser() {
-  signInAnonymously(auth)
-    .then(() => {
-      console.log('Signed in anonymously');
-    })
-    .catch((error) => {
-      console.error('Error signing in anonymously:', error);
-    });
-}
-
-// Export the auth module if needed
-export { signInAnonymouslyUser };
