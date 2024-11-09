@@ -5,7 +5,7 @@ import { loadFonts } from './plugins/webfontloader'
 import { auth } from './firebase';
 import router from './router'
 
-loadFonts()
+loadFonts();
 
 router.beforeEach((to, from, next) => {
     if (to.name === 'TictactoeView' && !auth.currentUser) {

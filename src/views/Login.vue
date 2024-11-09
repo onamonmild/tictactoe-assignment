@@ -7,7 +7,7 @@
         Anonymous
       </v-btn>
       <v-spacer></v-spacer>
-      <v-btn class="login-button" @click="signIn('Facebook')" color="#c71610" prepend-icon="mdi-gmail">
+      <v-btn class="login-button" @click="signIn('Google')" color="#c71610" prepend-icon="mdi-gmail">
         Google
       </v-btn>
       <v-spacer></v-spacer>
