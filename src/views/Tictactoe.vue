@@ -14,15 +14,26 @@
       <v-col cols="12" md="6">
         <v-card class="sub-main-card" elevation="5">
           <v-row>
-            <v-col cols="12" md="6">
-              <v-divider class="mt-8"></v-divider>
+            <v-col cols="12" md="12">
+              <v-btn-toggle v-model="gameModeToggle" color="primary" mandatory>
+                <v-btn value="Easy">
+                  <v-icon icon="mdi-robot-happy" size="40" start></v-icon>
+                  <h2>Easy</h2>
+                </v-btn>
+                <v-btn value="Hard">
+                  <v-icon icon="mdi-robot-angry" size="40" start></v-icon>
+                  <h2>Hard</h2>
+                </v-btn>
+              </v-btn-toggle>
             </v-col>
           </v-row>
 
           <v-divider></v-divider>
           <v-row align="center" justify="center" style="padding-top: 3%; padding-bottom: 3%">
             <v-col cols="12" md="3">
-              <v-icon icon="mdi-account-heart" size="120" :color="currentPlayer === human ? 'black' : 'grey'"></v-icon>
+              <v-icon icon="mdi-account-tie" size="120" 
+              :color="currentPlayer === human ? 'black' : 'grey'"
+              :class="currentPlayer === human ? 'bounce' : ''"></v-icon>
               <h3 :style="currentPlayer === human ? 'color: black;' : 'color: gray;'">YOU</h3>
             </v-col>
 
@@ -41,8 +52,10 @@
             </v-col>
 
             <v-col cols="12" md="3">
-              <v-icon icon="mdi-robot-love" size="120" :color="currentPlayer === bot ? 'black' : 'grey'"></v-icon>
-              <h3 :style="currentPlayer === bot ? 'color: black;' : 'color: gray;'">BOT</h3>
+              <v-icon icon="mdi-robot-love" size="120" 
+              :color="currentPlayer === bot ? 'black' : 'grey'"
+              :class="currentPlayer === bot ? 'bounce' : ''"></v-icon>
+              <h3 :style="currentPlayer === bot ? 'color: black;' : 'color: grey;'">BOT</h3>
             </v-col>
           </v-row>
 
@@ -50,7 +63,7 @@
 
           <v-row class="mt-4" v-if="isGameEnd">
             <v-col class="text-center">
-              <v-btn @click="startGame()" color="secondary">Next Game</v-btn>
+              <v-btn @click="startGame()" color="primary" size="x-large">Next Game</v-btn>
             </v-col>
           </v-row>
         </v-card>
@@ -67,9 +80,11 @@
         </v-card>
       </v-col>
     </v-row>
-
+  </v-container>
+  <v-container>
     <div v-if="isGameEnd" class="gif-container">
-      <img src="/Wingame.gif" alt="Game end" />
+      <img class="gif-left" src="/Wingame-left.gif" alt="Game end" />
+      <img class="gif-right" src="/Wingame-right.gif" alt="Game end" />
     </div>
   </v-container>
 </template>
@@ -91,6 +106,7 @@ export default {
       currentPlayer: "X",
       winPlayer: null,
       isGameEnd: false,
+      gameModeToggle: "Easy",
 
       board: Array(9).fill(null),
       winBoard: [
@@ -211,6 +227,7 @@ export default {
       return null;
     },
 
+    // Commond function
     delay(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
@@ -228,7 +245,7 @@ export default {
 .sub-main-card {
   padding: 3%;
   text-align: center;
-  height: 60vh;
+  height: 70vh;
   border-radius: 15px;
 }
 
@@ -259,21 +276,28 @@ export default {
   pointer-events: none;
 }
 
-.gif-container {
-  position: fixed; 
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 100%;
-  height: 100%;
+.bounce {
+  animation: bounce 0.5s infinite;
+}
+@keyframes bounce {
+  from, to { transform: scale(1, 1); }
+  25% { transform: scale(0.9, 1.1); }
+  50% { transform: scale(1.1, 0.9); }
+  75% { transform: scale(0.95, 1.05); }
 }
 
 .gif-container img {
-  max-width: 150%;
-  max-height: 150%;
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 100%;
+}
+
+.gif-left {
+  left: 0;
+}
+
+.gif-right {
+  right: 0;
 }
 </style>
