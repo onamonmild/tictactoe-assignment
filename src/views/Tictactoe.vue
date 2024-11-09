@@ -3,9 +3,12 @@
     <v-row align="center" justify="center">
       <v-col cols="12" md="8">
         <v-toolbar class="main-card" color="primary" elevation="5">
-          <v-toolbar-title>Welcome, {{ displayName }}</v-toolbar-title>
-          <v-spacer></v-spacer>
-          <v-btn @click="logout" right><v-icon>mdi-logout</v-icon>Logout</v-btn>
+          <v-toolbar-title>
+            <h3>Welcome, {{ displayName }}</h3>
+          </v-toolbar-title>
+          <v-btn @click="logout" size="x-large" right><v-icon>mdi-logout</v-icon>
+            <h4>Logout</h4>
+          </v-btn>
         </v-toolbar>
       </v-col>
     </v-row>
@@ -15,12 +18,12 @@
         <v-card class="sub-main-card" elevation="5">
           <v-row>
             <v-col cols="12" md="12">
-              <v-btn-toggle v-model="gameModeToggle" color="primary" mandatory>
-                <v-btn value="Easy">
+              <v-btn-toggle v-model="currentPlayer" color="primary" mandatory class="turn-toggle">
+                <v-btn :value="human">
                   <v-icon icon="mdi-robot-happy" size="40" start></v-icon>
                   <h2>Easy</h2>
                 </v-btn>
-                <v-btn value="Hard">
+                <v-btn :value="bot">
                   <v-icon icon="mdi-robot-angry" size="40" start></v-icon>
                   <h2>Hard</h2>
                 </v-btn>
@@ -29,12 +32,18 @@
           </v-row>
 
           <v-divider></v-divider>
-          <v-row align="center" justify="center" style="padding-top: 3%; padding-bottom: 3%">
-            <v-col cols="12" md="3">
-              <v-icon icon="mdi-account-tie" size="120" 
-              :color="currentPlayer === human ? 'black' : 'grey'"
-              :class="currentPlayer === human ? 'bounce' : ''"></v-icon>
-              <h3 :style="currentPlayer === human ? 'color: black;' : 'color: gray;'">YOU</h3>
+          <v-row align="start" justify="center" style="padding-top: 3%; padding-bottom: 3%">
+            <v-col cols="12" md="3" height="100%">
+              <v-icon icon="mdi-account-tie" size="120" :color="currentPlayer === human ? '#3f3f3f' : 'grey'"
+                :class="currentPlayer === human ? 'bounce' : ''"></v-icon><br>
+              <h3 :style="currentPlayer === human ? 'color: #3f3f3f;' : 'color: grey;'">Player (X)</h3>
+              <div>
+                <p :style="{ fontSize: '110px', color: '#3f3f3f' }">1</p>
+                <p :style="{ fontSize: '20px' }" color="primary" class="winstreak-text">Win streak</p><br><br>
+                <v-icon icon="mdi-fire" size="40"></v-icon>
+                <v-icon icon="mdi-fire" size="40"></v-icon>
+                <v-icon icon="mdi-fire" size="40"></v-icon>
+              </div>
             </v-col>
 
             <v-col cols="12" md="6">
@@ -52,17 +61,21 @@
             </v-col>
 
             <v-col cols="12" md="3">
-              <v-icon icon="mdi-robot-love" size="120" 
-              :color="currentPlayer === bot ? 'black' : 'grey'"
-              :class="currentPlayer === bot ? 'bounce' : ''"></v-icon>
-              <h3 :style="currentPlayer === bot ? 'color: black;' : 'color: grey;'">BOT</h3>
+              <v-icon icon="mdi-robot-love" size="120" :color="currentPlayer === bot ? '#3f3f3f' : 'grey'"
+                :class="currentPlayer === bot ? 'bounce' : ''"></v-icon><br>
+              <h3 :style="currentPlayer === bot ? 'color: #3f3f3f;' : 'color: grey;'">Bot (O)</h3>
+              <div>
+                <p :style="{ fontSize: '110px', color: '#3f3f3f' }">1</p>
+              </div>
             </v-col>
           </v-row>
 
           <v-divider class="mt-4"></v-divider>
 
           <v-row class="mt-4" v-if="isGameEnd">
-            <v-col class="text-center">
+            <v-col cols="12" md="12" class="text-center">
+              <h1>{{ gameEndMessage }}</h1>
+              <v-spacer></v-spacer>
               <v-btn @click="startGame()" color="primary" size="x-large">Next Game</v-btn>
             </v-col>
           </v-row>
@@ -77,6 +90,16 @@
             <p>currentPlayer: {{ currentPlayer }}</p>
             <p>isGameEnd : {{ isGameEnd }}</p>
           </div>
+          <v-btn-toggle v-model="gameModeToggle" color="primary" mandatory>
+            <v-btn value="Easy">
+              <v-icon icon="mdi-robot-happy" size="40" start></v-icon>
+              <h2>Easy</h2>
+            </v-btn>
+            <v-btn value="Hard">
+              <v-icon icon="mdi-robot-angry" size="40" start></v-icon>
+              <h2>Hard</h2>
+            </v-btn>
+          </v-btn-toggle>
         </v-card>
       </v-col>
     </v-row>
@@ -168,12 +191,12 @@ export default {
       let winPlayer = await this.calculateWinner(this.board, this.currentPlayer);
       if (winPlayer == this.human) {
         this.isGameEnd = true;
-        this.gameEndMessage = "You is winner!";
+        this.gameEndMessage = "You is the winner!";
         this.winPlayer = this.currentPlayer;
         this.score = this.score + 1;
       } else if (winPlayer == this.bot) {
         this.isGameEnd = true;
-        this.gameEndMessage = "Bot is winner!";
+        this.gameEndMessage = "Bot is the winner!";
         this.winPlayer = this.currentPlayer;
         this.score = this.score - 1;
       } else if (await this.calculateDrawGame(this.board) !== null) {
@@ -276,14 +299,33 @@ export default {
   pointer-events: none;
 }
 
-.bounce {
-  animation: bounce 0.5s infinite;
+
+.turn-toggle {
+  pointer-events: none;
 }
+
+.bounce {
+  animation: bounce 0.5s 2;
+}
+
 @keyframes bounce {
-  from, to { transform: scale(1, 1); }
-  25% { transform: scale(0.9, 1.1); }
-  50% { transform: scale(1.1, 0.9); }
-  75% { transform: scale(0.95, 1.05); }
+
+  from,
+  to {
+    transform: scale(1, 1);
+  }
+
+  25% {
+    transform: scale(0.9, 1.1);
+  }
+
+  50% {
+    transform: scale(1.1, 0.9);
+  }
+
+  75% {
+    transform: scale(0.95, 1.05);
+  }
 }
 
 .gif-container img {
@@ -299,5 +341,13 @@ export default {
 
 .gif-right {
   right: 0;
+}
+
+.winstreak-text {
+  background-color: #3f3f3f;
+  border-radius: 10px;
+  padding: 0px 10px;
+  color: white;
+  display: inline-block;
 }
 </style>
