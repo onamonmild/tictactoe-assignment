@@ -14,18 +14,18 @@
     </v-row>
 
     <v-row justify="center">
-      <v-col cols="12" md="6">
+      <v-col cols="12" md="5">
         <v-card class="sub-main-card" elevation="5">
           <v-row>
             <v-col cols="12" md="12">
               <v-btn-toggle v-model="currentPlayer" color="primary" mandatory class="turn-toggle">
                 <v-btn :value="human">
-                  <v-icon icon="mdi-robot-happy" size="40" start></v-icon>
-                  <h2>Easy</h2>
+                  <v-icon icon="mdi-account" size="40" start></v-icon>
+                  <h2>'X' Turn</h2>
                 </v-btn>
                 <v-btn :value="bot">
-                  <v-icon icon="mdi-robot-angry" size="40" start></v-icon>
-                  <h2>Hard</h2>
+                  <h2>'O' Turn</h2>
+                  <v-icon icon="mdi-robot" size="40" end></v-icon>
                 </v-btn>
               </v-btn-toggle>
             </v-col>
@@ -33,19 +33,6 @@
 
           <v-divider></v-divider>
           <v-row align="start" justify="center" style="padding-top: 3%; padding-bottom: 3%">
-            <v-col cols="12" md="3" height="100%">
-              <v-icon icon="mdi-account-tie" size="120" :color="currentPlayer === human ? '#3f3f3f' : 'grey'"
-                :class="currentPlayer === human ? 'bounce' : ''"></v-icon><br>
-              <h3 :style="currentPlayer === human ? 'color: #3f3f3f;' : 'color: grey;'">Player (X)</h3>
-              <div>
-                <p :style="{ fontSize: '110px', color: '#3f3f3f' }">1</p>
-                <p :style="{ fontSize: '20px' }" color="primary" class="winstreak-text">Win streak</p><br><br>
-                <v-icon icon="mdi-fire" size="40"></v-icon>
-                <v-icon icon="mdi-fire" size="40"></v-icon>
-                <v-icon icon="mdi-fire" size="40"></v-icon>
-              </div>
-            </v-col>
-
             <v-col cols="12" md="6">
               <div class="game-board">
                 <div class="board">
@@ -58,48 +45,68 @@
                   </v-btn>
                 </div>
               </div>
-            </v-col>
 
-            <v-col cols="12" md="3">
-              <v-icon icon="mdi-robot-love" size="120" :color="currentPlayer === bot ? '#3f3f3f' : 'grey'"
-                :class="currentPlayer === bot ? 'bounce' : ''"></v-icon><br>
-              <h3 :style="currentPlayer === bot ? 'color: #3f3f3f;' : 'color: grey;'">Bot (O)</h3>
-              <div>
-                <p :style="{ fontSize: '110px', color: '#3f3f3f' }">1</p>
-              </div>
+              <v-row align="center" justify="center" style="padding-top: 2%;">
+                <v-col cols="auto" style="display: flex; align-items: baseline;">
+                  <v-icon icon="mdi-robot-happy" size="40" start :color="!isHardMode ? 'primary' : 'grey'"></v-icon>
+                  <span style="font-size: 25px; text-align: right;"
+                    :style="{ color: !isHardMode ? $vuetify.theme.primary : 'grey' }">Easy</span>
+                </v-col>
+
+                <v-col cols="auto">
+                  <v-switch v-model="isHardMode" inset style="display: flex; "></v-switch>
+                </v-col>
+
+                <v-col cols="auto" style="display: flex; align-items: baseline;">
+                  <span style="font-size: 25px; text-align: left;"
+                    :style="{ color: isHardMode ? $vuetify.theme.primary : 'grey' }">Hard</span>
+                  <v-icon icon="mdi-robot-angry" size="40" end :color="isHardMode ? 'primary' : 'grey'"></v-icon>
+                </v-col>
+              </v-row>
             </v-col>
           </v-row>
 
-          <v-divider class="mt-4"></v-divider>
+          <v-divider></v-divider>
 
-          <v-row class="mt-4" v-if="isGameEnd">
+          <v-row class="mt-1" v-if="isGameEnd">
             <v-col cols="12" md="12" class="text-center">
-              <h1>{{ gameEndMessage }}</h1>
+              <span style="font-size: 30px;">{{ gameEndMessage }}</span>
               <v-spacer></v-spacer>
               <v-btn @click="startGame()" color="primary" size="x-large">Next Game</v-btn>
             </v-col>
           </v-row>
         </v-card>
       </v-col>
-      <v-col cols="12" md="2">
-        <v-card title="Score" class="sub-main-card" elevation="5">
-          <div>
-            <p>Score: {{ score }}</p>
-            <p>Win Streak: {{ winStreak }}</p>
-            <p>gameEndMessage: {{ gameEndMessage }}</p>
-            <p>currentPlayer: {{ currentPlayer }}</p>
-            <p>isGameEnd : {{ isGameEnd }}</p>
-          </div>
-          <v-btn-toggle v-model="gameModeToggle" color="primary" mandatory>
-            <v-btn value="Easy">
-              <v-icon icon="mdi-robot-happy" size="40" start></v-icon>
-              <h2>Easy</h2>
-            </v-btn>
-            <v-btn value="Hard">
-              <v-icon icon="mdi-robot-angry" size="40" start></v-icon>
-              <h2>Hard</h2>
-            </v-btn>
-          </v-btn-toggle>
+
+      <v-col cols="12" md="3">
+        <v-card class="sub-main-card" elevation="5">
+          <v-container fluid>
+            <div align="center" justify="center" style="padding-top: 5%; padding-bottom: 5%;">
+              <v-icon icon="mdi-account" size="100"></v-icon>
+            </div>
+            <v-row>
+              <v-col cols="4">
+                <v-list-subheader>Score</v-list-subheader>
+              </v-col>
+
+              <v-col cols="8">
+                <v-list-subheader>{{ score }}</v-list-subheader>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="4">
+                <v-list-subheader>Win streak</v-list-subheader>
+              </v-col>
+
+              <v-col cols="8">
+                <v-list-subheader>{{ winStreak }}</v-list-subheader>
+              </v-col>
+            </v-row>
+          </v-container>
+
+          <v-row align="end" justify="center">
+
+          </v-row>
         </v-card>
       </v-col>
     </v-row>
@@ -129,7 +136,7 @@ export default {
       currentPlayer: "X",
       winPlayer: null,
       isGameEnd: false,
-      gameModeToggle: "Easy",
+      isHardMode: false,
 
       board: Array(9).fill(null),
       winBoard: [
@@ -194,11 +201,18 @@ export default {
         this.gameEndMessage = "You is the winner!";
         this.winPlayer = this.currentPlayer;
         this.score = this.score + 1;
+        this.winStreak = this.winStreak + 1;
+        if (this.winStreak == 3) {
+          this.gameEndMessage = "You is the winner! (+1 extra score)";
+          this.score = this.score + 1;
+          this.winStreak = 0;
+        }
       } else if (winPlayer == this.bot) {
         this.isGameEnd = true;
         this.gameEndMessage = "Bot is the winner!";
         this.winPlayer = this.currentPlayer;
-        this.score = this.score - 1;
+        this.score = this.score <= 0 ? 0 : this.score - 1;
+        this.winStreak = 0;
       } else if (await this.calculateDrawGame(this.board) !== null) {
         this.isGameEnd = true;
         this.gameEndMessage = "Draw!";
@@ -268,7 +282,7 @@ export default {
 .sub-main-card {
   padding: 3%;
   text-align: center;
-  height: 70vh;
+  height: 75vh;
   border-radius: 15px;
 }
 
@@ -299,9 +313,36 @@ export default {
   pointer-events: none;
 }
 
-
 .turn-toggle {
   pointer-events: none;
+}
+
+.profile-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-item {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 8px;
+}
+
+.profile-topic {
+  font-size: 20px;
+  min-width: 120px;
+  text-align: left;
+
+  background-color: #3f3f3f;
+  border-radius: 7px;
+  padding: 0px 10px;
+  color: white;
+}
+
+.profile-value {
+  font-size: 25px;
+  margin-left: 20px;
+  text-align: left;
 }
 
 .bounce {
@@ -341,13 +382,5 @@ export default {
 
 .gif-right {
   right: 0;
-}
-
-.winstreak-text {
-  background-color: #3f3f3f;
-  border-radius: 10px;
-  padding: 0px 10px;
-  color: white;
-  display: inline-block;
 }
 </style>
