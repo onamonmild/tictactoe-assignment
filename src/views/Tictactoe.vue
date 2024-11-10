@@ -80,39 +80,77 @@
 
       <v-col cols="12" md="3">
         <v-card class="sub-main-card" elevation="5">
-          <v-container fluid>
-            <div align="center" justify="center" style="padding-top: 5%; padding-bottom: 5%;">
-              <v-icon icon="mdi-account" size="100"></v-icon>
-            </div>
-            <v-row>
-              <v-col cols="4">
-                <v-list-subheader>Score</v-list-subheader>
-              </v-col>
+          <v-container >
+            <v-avatar v-if="userPhotoURL" style="height: 100px; width: 100px;">
+              <img :src="userPhotoURL" alt="User Photo" class="avatar-class"/>
+            </v-avatar>
+            <v-avatar v-else size="100">
+              <v-icon size="100">mdi-account</v-icon>
+            </v-avatar><br>
+            <span style="font-size: 30px;">{{ displayName }}</span>
+            <v-divider></v-divider>
 
-              <v-col cols="8">
-                <v-list-subheader>{{ score }}</v-list-subheader>
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="4">
-                <v-list-subheader>Win streak</v-list-subheader>
-              </v-col>
-
-              <v-col cols="8">
-                <v-list-subheader>{{ winStreak }}</v-list-subheader>
-              </v-col>
-            </v-row>
+            <v-table density="compact">
+              <thead>
+                <!-- <tr>
+                  <th class="profile-topic">
+                    Best score
+                  </th>
+                  <th class="profile-value">
+                    {{ bestScore }}
+                  </th>
+                </tr> -->
+                <tr>
+                  <th class="profile-topic">
+                    Score
+                  </th>
+                  <th class="profile-value">
+                    {{ score }}
+                  </th>
+                </tr>
+                <tr>
+                  <th class="profile-topic">
+                    Win streak
+                  </th>
+                  <th class="profile-value">
+                    <v-icon icon="mdi-fire" :color="winStreak >= 1 ? 'orange' : 'grey'"></v-icon>
+                    <v-icon icon="mdi-fire" :color="winStreak >= 2 ? 'orange' : 'grey'"></v-icon>
+                    <v-icon icon="mdi-fire" :color="winStreak >= 3 ? 'orange' : 'grey'"></v-icon>
+                  </th>
+                </tr>
+                <tr>
+                  <th class="profile-topic">
+                    User win
+                  </th>
+                  <th class="profile-value">
+                    {{ userWinCount }}
+                  </th>
+                </tr>
+                <tr>
+                  <th class="profile-topic">
+                    Bot win
+                  </th>
+                  <th class="profile-value">
+                    {{ botWinCount }}
+                  </th>
+                </tr>
+                <tr>
+                  <th class="profile-topic">
+                    Draw
+                  </th>
+                  <th class="profile-value">
+                    {{ drawCount }}
+                  </th>
+                </tr>
+              </thead>
+            </v-table>
           </v-container>
-
-          <v-row align="end" justify="center">
-
-          </v-row>
         </v-card>
       </v-col>
     </v-row>
   </v-container>
   <v-container>
-    <div v-if="isGameEnd" class="gif-container">
+    <div v-if="isGameEnd && !isGameDraw && currentPlayer == human" class="gif-container">
       <img class="gif-left" src="/Wingame-left.gif" alt="Game end" />
       <img class="gif-right" src="/Wingame-right.gif" alt="Game end" />
     </div>
@@ -129,6 +167,7 @@ export default {
       // User
       user: null,
       displayName: "",
+      userPhotoURL: null,
 
       // Board game
       bot: "O",
@@ -136,7 +175,12 @@ export default {
       currentPlayer: "X",
       winPlayer: null,
       isGameEnd: false,
+      isGameDraw: false,
       isHardMode: false,
+
+      botWinCount: 0,
+      userWinCount: 0,
+      drawCount: 0,
 
       board: Array(9).fill(null),
       winBoard: [
@@ -159,16 +203,21 @@ export default {
 
   created() {
     auth.onAuthStateChanged((user) => {
+      console.log(user);
       if (user) {
+        this.user = user;
         if (user.displayName) {
           this.displayName = user.displayName;
+          this.userPhotoURL = user.photoURL;
         } else if (user.isAnonymous) {
           this.displayName = "Anonymous";
+          this.userPhotoURL = null;
         } else {
           this.displayName = "Unknown user";
         }
       } else {
         this.displayName = null;
+        this.userPhotoURL = null;
       }
     });
   },
@@ -178,18 +227,30 @@ export default {
     logout() {
       auth.signOut().then(() => {
         this.user = null;
-        this.score = 0;
+        this.displayName = null;
+        this.userPhotoURL = null;
+        this.score = null;
         this.$router.push("/");
+
+        this.botWinCount = 0;
+        this.userWinCount = 0;
+        this.drawCount = 0;
       });
     },
 
     // Board game
     startGame() {
       this.isGameEnd = false;
+      this.isGameDraw = false;
       this.board = Array(9).fill(null);
       this.currentPlayer = this.human;
       this.winPlayer = null;
       this.gameEndMessage = "";
+
+      if (this.winStreak == 3) {
+        this.winStreak = 0;
+      }
+
     },
 
     async selectMoveIndex(index) {
@@ -198,23 +259,26 @@ export default {
       let winPlayer = await this.calculateWinner(this.board, this.currentPlayer);
       if (winPlayer == this.human) {
         this.isGameEnd = true;
-        this.gameEndMessage = "You is the winner!";
+        this.userWinCount += 1;
+        this.gameEndMessage = "You are the winner!";
         this.winPlayer = this.currentPlayer;
-        this.score = this.score + 1;
+        this.score += 1;
         this.winStreak = this.winStreak + 1;
         if (this.winStreak == 3) {
-          this.gameEndMessage = "You is the winner! (+1 extra score)";
-          this.score = this.score + 1;
-          this.winStreak = 0;
+          this.gameEndMessage = "You are the winner! (+1 extra score)";
+          this.score += 1;
         }
       } else if (winPlayer == this.bot) {
         this.isGameEnd = true;
+        this.botWinCount += 1;
         this.gameEndMessage = "Bot is the winner!";
         this.winPlayer = this.currentPlayer;
         this.score = this.score <= 0 ? 0 : this.score - 1;
         this.winStreak = 0;
       } else if (await this.calculateDrawGame(this.board) !== null) {
+        this.isGameDraw = true;
         this.isGameEnd = true;
+        this.drawCount += 1;
         this.gameEndMessage = "Draw!";
       } else {
         await this.switchTurn();
@@ -222,14 +286,21 @@ export default {
     },
 
     botMove(board) {
-      const emptyIndex = [];
-      for (let i = 0; i < board.length; i++) {
-        if (board[i] === null || board[i] === "") {
-          emptyIndex.push(i);
+      let index = "";
+      if (!this.isHardMode) {
+        const emptyIndex = [];
+        for (let i = 0; i < board.length; i++) {
+          if (board[i] === null || board[i] === "") {
+            emptyIndex.push(i);
+          }
         }
+
+        index = emptyIndex[Math.floor(Math.random() * emptyIndex.length)];
+      } else {
+        index = this.findBestMove(board);
       }
-      let index = emptyIndex[Math.floor(Math.random() * emptyIndex.length)];
       setTimeout(() => this.selectMoveIndex(index), 500);
+
     },
 
     switchTurn() {
@@ -242,15 +313,12 @@ export default {
     calculateWinner(board, currentPlayer) {
       for (let item of this.winBoard) {
         const [x, y, z] = item;
-        console.log("X Y Z = " + x + y + z);
         if (
           board[x] !== "" &&
           board[x] !== null &&
           board[x] == board[y] &&
           board[y] == board[z]
         ) {
-          console.log("calculateWinner");
-          console.log(currentPlayer);
           return currentPlayer;
         }
       }
@@ -264,12 +332,77 @@ export default {
       return null;
     },
 
-    // Commond function
-    delay(ms) {
-      return new Promise((resolve) => setTimeout(resolve, ms));
+    findBestMove(board) {
+      let bestVal = -Infinity;
+      let bestMove = -1;
+
+      for (let i = 0; i < board.length; i++) {
+        if (board[i] === null) {
+          board[i] = this.bot;
+          let moveVal = this.minimax(board, 0, false);
+          board[i] = null;
+
+          if (moveVal > bestVal) {
+            bestMove = i;
+            bestVal = moveVal;
+          }
+        }
+      }
+      return bestMove;
+    },
+
+    minimax(board, depth, isMaximizingPlayer) {
+      let score = this.evaluate(board);
+
+      if (score === 10) {
+        return score - depth;
+      }
+
+      if (score === -10) {
+        return score + depth;
+      }
+
+      if (this.calculateDrawGame(board)) {
+        return 0;
+      }
+
+      if (isMaximizingPlayer) {
+        let best = -Infinity;
+        for (let i = 0; i < board.length; i++) {
+          if (board[i] === null) {
+            board[i] = this.bot;
+            best = Math.max(best, this.minimax(board, depth + 1, !isMaximizingPlayer));
+            board[i] = null;
+          }
+        }
+        return best;
+      } else {
+        let best = Infinity;
+        for (let i = 0; i < board.length; i++) {
+          if (board[i] === null) {
+            board[i] = this.human;
+            best = Math.min(best, this.minimax(board, depth + 1, !isMaximizingPlayer));
+            board[i] = null;
+          }
+        }
+        return best;
+      }
+    },
+
+    evaluate(board) {
+      for (let item of this.winBoard) {
+        const [x, y, z] = item;
+        if (board[x] === this.bot && board[y] === this.bot && board[z] === this.bot) {
+          return 10;
+        } else if (board[x] === this.human && board[y] === this.human && board[z] === this.human) {
+          return -10;
+        }
+      }
+      return 0;
     },
   },
 };
+
 </script>
 
 <style scoped>
@@ -317,32 +450,17 @@ export default {
   pointer-events: none;
 }
 
-.profile-container {
-  display: flex;
-  flex-direction: column;
-}
-
-.profile-item {
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 8px;
-}
 
 .profile-topic {
   font-size: 20px;
   min-width: 120px;
   text-align: left;
-
-  background-color: #3f3f3f;
-  border-radius: 7px;
-  padding: 0px 10px;
-  color: white;
 }
 
 .profile-value {
-  font-size: 25px;
+  font-size: 20px;
   margin-left: 20px;
-  text-align: left;
+  text-align: right;
 }
 
 .bounce {
@@ -382,5 +500,10 @@ export default {
 
 .gif-right {
   right: 0;
+}
+
+.avatar-class {
+  width: 100px;
+  height: 100px;
 }
 </style>

@@ -10,9 +10,13 @@
       <v-btn class="login-button" @click="signIn('Google')" color="#c71610" prepend-icon="mdi-gmail">
         Google
       </v-btn>
-      <v-spacer></v-spacer>
+      <!-- <v-spacer></v-spacer>
       <v-btn class="login-button" @click="signIn('Facebook')" color="blue" prepend-icon="mdi-facebook">
         Facebook
+      </v-btn> -->
+      <v-spacer></v-spacer>
+      <v-btn class="login-button" @click="signIn('Github')" color="black" prepend-icon="mdi-github">
+        Github
       </v-btn>
     </v-card>
   </v-container>
@@ -32,7 +36,7 @@
 </template>
 
 <script>
-import { auth, googleProvider, facebookProvider } from '../firebase';
+import { auth, googleProvider, facebookProvider, githubProvider } from '../firebase';
 import { signInWithPopup, signInAnonymously } from 'firebase/auth';
 
 export default {
@@ -53,14 +57,17 @@ export default {
         }
         else if (type == "Google") {
           await signInWithPopup(auth, googleProvider);
+        }
+        else if (type == "Github") {
+          await signInWithPopup(auth, githubProvider);
         } else {
           // Not support type
         }
         this.$router.push('/Tictactoe');
 
       } catch (error) {
+        console.log(error);
         this.dialogErrorSignIn = true;
-        console.error('Error during Anonymous login:', error);
       }
     },
   }
