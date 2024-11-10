@@ -1,5 +1,6 @@
 # Tic Tac Toe
 A simple and interactive Tic Tac Toe game built with Vue 3 and styled using Vuetify 3. This project includes features like user authentication using Firebase (Google/Github login), scorekeeping, and a bot opponent with varying difficulty levels.
+![Recording2024-11-10192548-ezgif com-crop](https://github.com/user-attachments/assets/59914a3d-e109-41ff-91a5-d3c308e5bc5e)
 
 ## Project setup
 * Node.js (>=14.x)
